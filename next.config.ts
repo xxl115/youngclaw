@@ -11,6 +11,15 @@ function getGitSha(): string {
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        crypto: require.resolve('crypto-browserify'),
+      };
+    }
+    return config;
+  },
   turbopack: {
     // Pin workspace root to the project directory so a stale lockfile
     // in a parent folder (e.g. ~/) doesn't confuse native module resolution.
