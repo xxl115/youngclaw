@@ -270,6 +270,7 @@ export interface Agent {
   trashedAt?: number
   openclawSkillMode?: SkillAllowlistMode
   openclawAllowedSkills?: string[]
+  openclawAgentId?: string  // OpenClaw agent ID to use (e.g., 'main', 'ai_daily', 'product')
   createdAt: number
   updatedAt: number
 }

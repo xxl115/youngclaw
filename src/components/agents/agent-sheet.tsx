@@ -103,6 +103,7 @@ export function AgentSheet() {
   const [capInput, setCapInput] = useState('')
   const [ollamaMode, setOllamaMode] = useState<'local' | 'cloud'>('local')
   const [openclawEnabled, setOpenclawEnabled] = useState(false)
+  const [openclawAgentId, setOpenclawAgentId] = useState('')
   const [projectId, setProjectId] = useState<string | undefined>(undefined)
   const [avatarSeed, setAvatarSeed] = useState('')
   const [thinkingLevel, setThinkingLevel] = useState<'' | 'minimal' | 'low' | 'medium' | 'high'>('')
@@ -182,6 +183,7 @@ export function AgentSheet() {
         setCapInput('')
         setOllamaMode(editing.credentialId && editing.provider === 'ollama' ? 'cloud' : 'local')
         setOpenclawEnabled(editing.provider === 'openclaw')
+        setOpenclawAgentId(editing.openclawAgentId || '')
         setProjectId(editing.projectId)
         setAvatarSeed(editing.avatarSeed || crypto.randomUUID().slice(0, 8))
         setThinkingLevel(editing.thinkingLevel || '')
@@ -317,6 +319,7 @@ export function AgentSheet() {
       heartbeatIntervalSec: heartbeatIntervalSec ? Number(heartbeatIntervalSec) : null,
       heartbeatModel: heartbeatModel.trim() || null,
       heartbeatPrompt: heartbeatPrompt.trim() || null,
+      openclawAgentId: openclawAgentId.trim() || undefined,
     }
     if (editing) {
       await updateAgent(editing.id, data)
@@ -753,10 +756,24 @@ export function AgentSheet() {
                 placeholder="http://localhost:18789"
                 className={inputClass}
                 style={{ fontFamily: 'inherit' }}
-              />
-            </div>
-            <div>
-              <label className="block font-display text-[12px] font-600 text-text-2 uppercase tracking-[0.08em] mb-2">Gateway Token</label>
+               />
+             </div>
+             <div>
+               <label className="block font-display text-[12px] font-600 text-text-2 uppercase tracking-[0.08em] mb-2">OpenClaw Agent ID</label>
+               <input
+                 type="text"
+                 value={openclawAgentId}
+                 onChange={(e) => setOpenclawAgentId(e.target.value)}
+                 placeholder="main"
+                 className={inputClass}
+                 style={{ fontFamily: 'inherit' }}
+               />
+               <p className="text-[12px] text-text-3/80 mt-1">
+                 Leave empty to use default agent (main)
+               </p>
+             </div>
+             <div>
+               <label className="block font-display text-[12px] font-600 text-text-2 uppercase tracking-[0.08em] mb-2">Gateway Token</label>
               {openclawCredentials.length > 0 && !addingKey ? (
                 <div className="flex gap-2">
                   <select value={credentialId || ''} onChange={(e) => {

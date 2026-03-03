@@ -3,6 +3,7 @@ import crypto, { randomUUID } from 'crypto'
 import fs from 'fs'
 import path from 'path'
 import type { StreamChatOptions } from './index'
+import { loadAgents } from '@/lib/server/storage'
 
 // --- Device Identity (Ed25519 keypair for gateway auth) ---
 
@@ -287,7 +288,12 @@ export function streamOpenClawChat({ session, message, imagePath, apiKey, write,
 
   const wsUrl = session.apiEndpoint ? normalizeWsUrl(session.apiEndpoint) : 'ws://127.0.0.1:18789'
   const token = apiKey || session.apiKey || undefined
-
+  
+  // Get OpenClaw agent ID from agent config or default to 'main'
+  const agents = loadAgents({ includeTrashed: false })
+  const agent = Object.values(agents).find(a => a.id === session.agentId)
+  const openclawAgentId = agent?.openclawAgentId || 'main'
+ 
   return new Promise((resolve) => {
     let fullResponse = ''
     let settled = false
@@ -323,7 +329,7 @@ export function streamOpenClawChat({ session, message, imagePath, apiKey, write,
         method: 'agent',
         params: {
           message: prompt,
-          agentId: 'main',
+          agentId: openclawAgentId,
           timeout: 120,
           idempotencyKey: randomUUID(),
         },
