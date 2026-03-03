@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useAppStore } from '@/stores/use-app-store'
-import { createTask, updateTask, archiveTask, unarchiveTask } from '@/lib/tasks'
+import { createTask, updateTask, archiveTask, unarchiveTask, deleteTask } from '@/lib/tasks'
 import { BottomSheet } from '@/components/shared/bottom-sheet'
 import { AgentPickerList } from '@/components/shared/agent-picker-list'
 import { DirBrowser } from '@/components/shared/dir-browser'
@@ -166,6 +166,14 @@ export function TaskSheet() {
   const handleQueue = async () => {
     if (editing && editing.status === 'backlog') {
       await updateTask(editing.id, { status: 'queued' })
+      await loadTasks()
+      onClose()
+    }
+  }
+
+  const handleDelete = async () => {
+    if (editing && confirm('Are you sure you want to delete this task?')) {
+      await deleteTask(editing.id)
       await loadTasks()
       onClose()
     }
@@ -837,6 +845,11 @@ export function TaskSheet() {
         saveLabel={editing ? 'Save' : 'Create'}
         saveDisabled={!title.trim() || !agentId}
         left={<>
+          {editing && editing.status !== 'archived' && (
+            <button onClick={handleDelete} className="py-3.5 px-6 rounded-[14px] border border-red-500/20 bg-transparent text-red-400 text-[15px] font-600 cursor-pointer hover:bg-red-500/10 transition-all" style={{ fontFamily: 'inherit' }}>
+              Delete
+            </button>
+          )}
           {editing && editing.status !== 'archived' && (
             <button onClick={handleArchive} className="py-3.5 px-6 rounded-[14px] border border-white/[0.08] bg-transparent text-text-3 text-[15px] font-600 cursor-pointer hover:bg-white/[0.04] transition-all" style={{ fontFamily: 'inherit' }}>
               Archive
