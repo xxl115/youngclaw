@@ -1,6 +1,6 @@
 import { genId } from '@/lib/id'
 import { NextResponse } from 'next/server'
-import { loadTasks, saveTasks, logActivity } from '@/lib/server/storage'
+import { loadTasks, saveTasks, loadSchedules, saveSchedules, logActivity } from '@/lib/server/storage'
 import { notFound } from '@/lib/server/collection-helpers'
 import { disableSessionHeartbeat, enqueueTask, validateCompletedTasksQueue } from '@/lib/server/queue'
 import { ensureTaskCompletionReport } from '@/lib/server/task-reports'
@@ -141,22 +141,38 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   return NextResponse.json(tasks[id])
 }
 
-export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const tasks = loadTasks()
   if (!tasks[id]) return notFound()
-
-  // Soft delete: move to archived status instead of hard delete
-  tasks[id].status = 'archived'
-  tasks[id].archivedAt = Date.now()
-  tasks[id].updatedAt = Date.now()
+  
+  const url = new URL(req.url)
+  const force = url.searchParams.get('force') === 'true'
+  
+  // Hard delete: permanently remove the task
+  delete tasks[id]
   saveTasks(tasks)
-  logActivity({ entityType: 'task', entityId: id, action: 'deleted', actor: 'user', summary: `Task archived: "${tasks[id].title}"` })
+  
+  // Clear linkedTaskId from schedules that reference this task
+  const schedules = loadSchedules()
+  let scheduleUpdated = false
+  for (const scheduleId in schedules) {
+    if (schedules[scheduleId].linkedTaskId === id) {
+      schedules[scheduleId].linkedTaskId = null
+      scheduleUpdated = true
+    }
+  }
+  if (scheduleUpdated) {
+    saveSchedules(schedules)
+  }
+  
+  logActivity({ entityType: 'task', entityId: id, action: 'deleted', actor: 'user', summary: `Task deleted: "${tasks[id]?.title || id}"` })
   pushMainLoopEventToMainSessions({
-    type: 'task_archived',
-    text: `Task archived: "${tasks[id].title}" (${id}).`,
+    type: 'task_deleted',
+    text: `Task deleted: "${tasks[id]?.title || id}" (${id}).`,
   })
-
+  
   notify('tasks')
-  return NextResponse.json(tasks[id])
+  notify('schedules')
+  return NextResponse.json({ success: true })
 }
