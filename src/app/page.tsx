@@ -85,8 +85,8 @@ function FullScreenLoader() {
       {/* Brand text */}
       <div
         className="text-[15px] font-display font-700 tracking-[0.15em] uppercase"
-        style={{
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.6), rgba(129, 140, 248, 0.8))',
+            style={{
+              background: `linear-gradient(135deg, ${isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.03)'}, rgba(129, 140, 248, 0.8))`,
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           animation: 'sc-text-fade 2s ease-in-out infinite alternate',
