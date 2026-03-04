@@ -6,6 +6,16 @@ import "./globals.css"
 export const metadata: Metadata = {
   title: "SwarmClaw",
   description: "AI agent orchestration dashboard with multi-provider support",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "SwarmClaw",
+  },
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
 }
 
 export const viewport: Viewport = {
@@ -13,10 +23,9 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: "cover",
+  themeColor: "#6366F1",
 }
 
-// Avoid static prerendering for the app shell. This prevents flaky
-// Turbopack prerender failures seen in detached fresh-install builds.
 export const dynamic = "force-dynamic"
 
 export default function RootLayout({
@@ -25,11 +34,20 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
             __html: `
+              (function() {
+                try {
+                  var themeMode = localStorage.getItem('sc_theme_mode') || 'dark';
+                  document.documentElement.classList.remove('dark', 'light');
+                  document.documentElement.classList.add(themeMode);
+                  document.documentElement.setAttribute('data-theme', themeMode);
+                } catch(e) {}
+              })();
+
               if (!crypto.randomUUID) {
                 crypto.randomUUID = function() {
                   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
