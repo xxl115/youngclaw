@@ -562,11 +562,18 @@ textarea:hover::-webkit-scrollbar { width: 6px; }
   --status-approval-border: rgba(249,115,22,0.2);
   --status-approval-fg: #f97316;
   
-  /* Command */
-  --command-bg: #ffffff;
-  --command-border: rgba(0,0,0,0.08);
-  --command-header: rgba(0,0,0,0.03);
-  
+ /* Command */
+   --command-bg: #ffffff;
+   --command-border: rgba(0,0,0,0.08);
+   --command-header: rgba(0,0,0,0.03);
+   
+   /* Scrollbar - Light Mode */
+   * { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.15) transparent; }
+   ::-webkit-scrollbar { width: 6px; height: 6px; }
+   ::-webkit-scrollbar-track { background: transparent; }
+   ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 6px; }
+   ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.25); }
+   
    /* Neutral tint */
    --neutral-tint: #e8e5df;
    

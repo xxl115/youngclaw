@@ -649,24 +649,24 @@ export function AppLayout() {
               </button>
             </div>
             )}
-            {activeView === 'agents' && (
-              <>
-                <div className="flex gap-1 px-4 pb-2">
-                  {(['chat', 'config'] as const).map((mode) => (
-                    <button
-                      key={mode}
-                      onClick={() => setAgentViewMode(mode)}
-                      className={`px-3 py-1.5 rounded-[8px] text-[11px] font-600 capitalize cursor-pointer transition-all
-                        ${agentViewMode === mode ? 'bg-accent-soft text-accent-bright' : 'bg-transparent text-text-3 hover:text-text-2'}`}
-                      style={{ fontFamily: 'inherit' }}
-                    >
-                      {mode}
-                    </button>
-                  ))}
-                </div>
-                {agentViewMode === 'chat' ? <AgentChatList inSidebar onSelect={() => setSidebarOpen(false)} /> : <AgentList inSidebar />}
-              </>
-            )}
+          {activeView === 'agents' && (
+            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+              <div className="flex gap-1 px-4 pb-2">
+                {(['chat', 'config'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setAgentViewMode(mode)}
+                    className={`px-3 py-1.5 rounded-[8px] text-[11px] font-600 capitalize cursor-pointer transition-all
+                      ${agentViewMode === mode ? 'bg-accent-soft text-accent-bright' : 'bg-transparent text-text-3 hover:text-text-2'}`}
+                    style={{ fontFamily: 'inherit' }}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
+              {agentViewMode === 'chat' ? <AgentChatList inSidebar onSelect={() => setSidebarOpen(false)} /> : <AgentList inSidebar />}
+            </div>
+          )}
             {activeView === 'schedules' && <ScheduleList inSidebar />}
             {activeView === 'memory' && <MemoryAgentList />}
             {activeView === 'tasks' && <TaskList inSidebar />}
