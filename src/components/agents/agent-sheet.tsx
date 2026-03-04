@@ -102,9 +102,10 @@ export function AgentSheet() {
   const [capabilities, setCapabilities] = useState<string[]>([])
   const [capInput, setCapInput] = useState('')
   const [ollamaMode, setOllamaMode] = useState<'local' | 'cloud'>('local')
-  const [openclawEnabled, setOpenclawEnabled] = useState(false)
-  const [openclawAgentId, setOpenclawAgentId] = useState('')
-  const [projectId, setProjectId] = useState<string | undefined>(undefined)
+   const [openclawEnabled, setOpenclawEnabled] = useState(false)
+   const [openclawAgentId, setOpenclawAgentId] = useState('')
+    
+   const [projectId, setProjectId] = useState<string | undefined>(undefined)
   const [avatarSeed, setAvatarSeed] = useState('')
   const [thinkingLevel, setThinkingLevel] = useState<'' | 'minimal' | 'low' | 'medium' | 'high'>('')
   const [voiceId, setVoiceId] = useState('')
@@ -427,7 +428,11 @@ export function AgentSheet() {
     setSaving(false)
   }
 
-  const agentOptions = Object.values(agents).filter((p) => !p.isOrchestrator && p.id !== editingId)
+   // For all Orchestrators, show all non-orchestrator agents
+   const agentOptions = Object.values(agents).filter((p) => {
+     if (p.id === editingId) return false
+     return !p.isOrchestrator
+   })
 
   const toggleAgent = (id: string) => {
     setAgentAgentIds((prev) =>
@@ -669,8 +674,7 @@ export function AgentSheet() {
         <p className="text-[11px] text-text-3/70 mt-1.5">Periodic check-in runs on idle sessions using this agent. Processes pending events and monitors status.</p>
       </div>
 
-      {provider !== 'openclaw' && (
-        <div className="mb-8">
+      <div className="mb-8">
           <label className="flex items-center gap-2 font-display text-[12px] font-600 text-text-2 uppercase tracking-[0.08em] mb-2">
             Soul / Personality <span className="normal-case tracking-normal font-normal text-text-3">(optional)</span>
             {soul !== soulInitial && soulSaveState === 'idle' && (
@@ -722,10 +726,8 @@ export function AgentSheet() {
             style={{ fontFamily: 'inherit' }}
           />
         </div>
-      )}
 
-      {provider !== 'openclaw' && (
-        <div className="mb-8">
+      <div className="mb-8">
           <div className="flex items-center gap-2 mb-3">
             <label className="block font-display text-[12px] font-600 text-text-2 uppercase tracking-[0.08em]">System Prompt</label>
             <button onClick={() => promptFileRef.current?.click()} className="shrink-0 px-2 py-1 rounded-[8px] border border-white/[0.08] bg-surface text-[11px] text-text-3 hover:text-text-2 cursor-pointer transition-colors" style={{ fontFamily: 'inherit' }}>Upload .md</button>
@@ -737,10 +739,9 @@ export function AgentSheet() {
             placeholder="You are an expert..."
             rows={5}
             className={`${inputClass} resize-y min-h-[120px]`}
-            style={{ fontFamily: 'inherit' }}
-          />
+             style={{ fontFamily: 'inherit' }}
+           />
         </div>
-      )}
 
       {/* OpenClaw Gateway Fields */}
       {openclawEnabled && (
@@ -1352,8 +1353,7 @@ export function AgentSheet() {
         </div>
       )}
 
-      {provider !== 'openclaw' && (
-        <div className="mb-8">
+       <div className="mb-8">
           <label className="flex items-center gap-3 cursor-pointer">
             <div
               onClick={() => {
@@ -1371,9 +1371,8 @@ export function AgentSheet() {
             <span className="text-[12px] text-text-3">Route work to specialized agents and coordinate multi-agent tasks</span>
           </label>
         </div>
-      )}
 
-      {provider !== 'openclaw' && isOrchestrator && agentOptions.length > 0 && (
+       {isOrchestrator && agentOptions.length > 0 && (
         <div className="mb-8">
           <SectionLabel>Available Agents</SectionLabel>
           <AgentPickerList

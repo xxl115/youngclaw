@@ -67,16 +67,18 @@ export async function executeOrchestrator(
   sessionId: string,
   taskId?: string,
 ): Promise<string> {
-  // Use LangGraph for all non-CLI providers (including OpenAI-compatible custom providers)
+  // Use LangGraph for non-CLI and non-OpenClaw providers
+  // OpenClaw has its own multi-agent routing system, so use legacy engine
   const isCliProvider = orchestrator.provider === 'claude-cli' || orchestrator.provider === 'codex-cli' || orchestrator.provider === 'opencode-cli'
-  if (!isCliProvider) {
+  const isOpenClawProvider = orchestrator.provider === 'openclaw'
+  if (!isCliProvider && !isOpenClawProvider) {
     console.log(`[orchestrator] Using LangGraph engine for ${orchestrator.name} (${orchestrator.provider})`)
     const { executeLangGraphOrchestrator } = await import('./orchestrator-lg')
     return executeLangGraphOrchestrator(orchestrator, task, sessionId, taskId)
   }
 
-  // claude-cli fallback (no structured tool calling)
-  console.warn(`[orchestrator] Using legacy regex-based engine for ${orchestrator.name} (claude-cli)`)
+  // CLI and OpenClaw fallback (no structured tool calling)
+  console.warn(`[orchestrator] Using legacy regex-based engine for ${orchestrator.name} (${orchestrator.provider})`)
   return executeOrchestratorLegacy(orchestrator, task, sessionId)
 }
 
