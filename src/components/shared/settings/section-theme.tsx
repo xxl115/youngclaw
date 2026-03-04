@@ -1,28 +1,77 @@
 'use client'
 
-import { useState } from 'react'
 import { toast } from 'sonner'
 import type { SettingsSectionProps } from './types'
 
-const PRESETS = [
-  { label: 'Default', color: '#1e1e30' },
-  { label: 'Midnight', color: '#1a1a3a' },
-  { label: 'Forest', color: '#1a2e1e' },
-  { label: 'Warm', color: '#2e1e1a' },
-  { label: 'Slate', color: '#1e2428' },
-  { label: 'Rose', color: '#2e1a24' },
-]
+export function ThemeSection({ appSettings, patchSettings }: SettingsSectionProps) {
+  const themeMode = appSettings.themeMode || 'dark'
 
-export function ThemeSection({ appSettings, patchSettings, inputClass }: SettingsSectionProps) {
-  const currentHue = appSettings.themeHue || PRESETS[0].color
-  const [customHex, setCustomHex] = useState(
-    PRESETS.some((p) => p.color === currentHue) ? '' : currentHue,
+  const applyThemeMode = (mode: 'dark' | 'light') => {
+    patchSettings({ themeMode: mode })
+    localStorage.setItem('sc_theme_mode', mode)
+    
+    const root = document.documentElement
+    root.classList.remove('dark', 'light')
+    root.classList.add(mode)
+    root.setAttribute('data-theme', mode)
+    
+    toast.success(`Theme: ${mode === 'light' ? '☀️ Light' : '🌙 Dark'}`)
+  }
+
+  return (
+    <div className="mb-10">
+      <h3 className="font-display text-[12px] font-600 text-text-2 uppercase tracking-[0.08em] mb-2">
+        Theme
+      </h3>
+      <p className="text-[12px] text-text-3 mb-5">
+        Switch between dark and light mode.
+      </p>
+
+      {/* Dark/Light Mode Toggle */}
+      <div className="flex items-center gap-3 mb-6">
+        <span className="text-[12px] text-text-2 shrink-0">Mode</span>
+        <div className="flex rounded-md border border-white/10 overflow-hidden">
+          <button
+            onClick={() => applyThemeMode('dark')}
+            className={`px-4 py-2 text-xs font-medium transition-colors ${
+              themeMode === 'dark'
+                ? 'bg-accent text-accent-foreground'
+                : 'text-text-3 hover:text-text hover:bg-white/5'
+            }`}
+          >
+            🌙 Dark
+          </button>
+          <button
+            onClick={() => applyThemeMode('light')}
+            className={`px-4 py-2 text-xs font-medium transition-colors ${
+              themeMode === 'light'
+                ? 'bg-accent text-accent-foreground'
+                : 'text-text-3 hover:text-text hover:bg-white/5'
+            }`}
+          >
+            ☀️ Light
+          </button>
+        </div>
+      </div>
+    </div>
   )
+}
 
-  const applyHue = (color: string) => {
-    patchSettings({ themeHue: color })
-    document.documentElement.style.setProperty('--neutral-tint', color)
-    toast.success('Theme updated')
+  const applyThemeMode = (mode: 'dark' | 'light') => {
+    // Save to settings and localStorage
+    patchSettings({ themeMode: mode })
+    localStorage.setItem('sc_theme_mode', mode)
+    
+    const root = document.documentElement
+    
+    // Toggle class - remove both first, then add the right one
+    root.classList.remove('dark', 'light')
+    root.classList.add(mode)
+    
+    // Also set data attribute for any CSS that uses [data-theme]
+    root.setAttribute('data-theme', mode)
+    
+    toast.success(`Theme: ${mode === 'light' ? '☀️ Light' : '🌙 Dark'}`)
   }
 
   const handleCustomChange = (value: string) => {
@@ -40,6 +89,33 @@ export function ThemeSection({ appSettings, patchSettings, inputClass }: Setting
       <p className="text-[12px] text-text-3 mb-5">
         Shift the UI color palette. Pick a preset or enter a custom hex color.
       </p>
+
+      {/* Dark/Light Mode Toggle */}
+      <div className="flex items-center gap-3 mb-6">
+        <span className="text-[12px] text-text-2 shrink-0">Mode</span>
+        <div className="flex rounded-md border border-white/10 overflow-hidden">
+          <button
+            onClick={() => applyThemeMode('dark')}
+            className={`px-4 py-2 text-xs font-medium transition-colors ${
+              themeMode === 'dark'
+                ? 'bg-accent text-accent-foreground'
+                : 'text-text-3 hover:text-text hover:bg-white/5'
+            }`}
+          >
+            🌙 Dark
+          </button>
+          <button
+            onClick={() => applyThemeMode('light')}
+            className={`px-4 py-2 text-xs font-medium transition-colors ${
+              themeMode === 'light'
+                ? 'bg-accent text-accent-foreground'
+                : 'text-text-3 hover:text-text hover:bg-white/5'
+            }`}
+          >
+            ☀️ Light
+          </button>
+        </div>
+      </div>
 
       {/* Preset swatches */}
       <div className="flex flex-wrap gap-3 mb-4">
