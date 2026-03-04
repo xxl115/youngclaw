@@ -144,6 +144,8 @@ export default function Home() {
   const loadNetworkInfo = useAppStore((s) => s.loadNetworkInfo)
   const loadSessions = useAppStore((s) => s.loadSessions)
   const loadSettings = useAppStore((s) => s.loadSettings)
+  const appSettings = useAppStore((s) => s.appSettings)
+  const isDark = appSettings.themeMode !== 'light'
 
   const [authChecked, setAuthChecked] = useState(false)
   const [authenticated, setAuthenticated] = useState(false)
