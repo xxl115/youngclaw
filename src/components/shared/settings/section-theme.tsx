@@ -3,7 +3,7 @@
 import { toast } from 'sonner'
 import type { SettingsSectionProps } from './types'
 
-export function ThemeSection({ appSettings, patchSettings }: SettingsSectionProps) {
+export function ThemeSection({ appSettings, patchSettings, inputClass }: SettingsSectionProps) {
   const themeMode = appSettings.themeMode || 'dark'
 
   const applyThemeMode = (mode: 'dark' | 'light') => {
