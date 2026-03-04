@@ -506,11 +506,11 @@ textarea:hover::-webkit-scrollbar { width: 6px; }
     @apply border-border outline-ring/50;
   }
 }
-:root.light,
-[data-theme="light"] {
-  /* Warm background tones */
-  --background: #faf8f5;
-  --foreground: #3d3a35;
+ :root.light,
+ [data-theme="light"] {
+   /* Warm background tones */
+   --background: #f0eae2;
+   --foreground: #1c1916;
   --card: #ffffff;
   --card-foreground: #3d3a35;
   --popover: #ffffff;
@@ -577,21 +577,21 @@ textarea:hover::-webkit-scrollbar { width: 6px; }
    /* Neutral tint */
    --neutral-tint: #e8e5df;
    
-   /* Midnight Glass Palette - Light Mode */
-   --color-bg: #faf8f5;
-   --color-raised: #ffffff;
-   --color-surface: #f0ede8;
-   --color-surface-2: #e8e5df;
-   --color-surface-3: #e0ddd6;
-   --color-border-hi: rgba(0,0,0,0.08);
-   --color-border-focus: rgba(99,102,241,0.4);
-   --color-text: #3d3a35;
-   --color-text-2: #5a564f;
-   --color-text-3: #7a756d;
-   --color-accent-soft: rgba(99,102,241,0.12);
-   --color-accent-glow: rgba(99,102,241,0.25);
-   --color-accent-bright: #6366F1;
-   --color-user-text: #3d3a35;
+    /* Midnight Glass Palette - Light Mode */
+    --color-bg: #f5f4ef;
+    --color-raised: #ffffff;
+    --color-surface: #ebe9e3;
+    --color-surface-2: #e5e3db;
+    --color-surface-3: #dfddd5;
+    --color-border-hi: rgba(0,0,0,0.12);
+    --color-border-focus: rgba(99,102,241,0.4);
+    --color-text: #2d2a25;
+    --color-text-2: #4a4640;
+    --color-text-3: #6b6760;
+    --color-accent-soft: rgba(99,102,241,0.15);
+    --color-accent-glow: rgba(99,102,241,0.3);
+    --color-accent-bright: #6366F1;
+    --color-user-text: #2d2a25;
    --color-success: #22c55e;
    --color-success-soft: rgba(34,197,94,0.1);
    --color-danger: #ef4444;
