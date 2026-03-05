@@ -323,6 +323,11 @@ body {
 
 :root.light,
 [data-theme="light"] {
+  /* Fonts */
+  --font-dm-sans: 'Segoe UI';
+  --font-sora: 'Segoe UI';
+  --font-jetbrains-mono: 'Cascadia Code', 'Fira Code', monospace;
+  
   /* Warm background tones */
   --background: #f0eae2;
   --foreground: #1c1916;
