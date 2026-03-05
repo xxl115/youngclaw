@@ -5,6 +5,7 @@ import { streamOpenAiChat } from './openai'
 import { streamOllamaChat } from './ollama'
 import { streamAnthropicChat } from './anthropic'
 import { streamOpenClawChat } from './openclaw'
+import { streamZhipuChat } from './zhipu'
 import type { ProviderInfo, ProviderConfig as CustomProviderConfig } from '../../types'
 
 const RETRYABLE_STATUS_CODES = [401, 429, 500, 502, 503]
@@ -200,6 +201,74 @@ const PROVIDERS: Record<string, BuiltinProviderConfig> = {
         const patchedSession = {
           ...opts.session,
           apiEndpoint: opts.session.apiEndpoint || 'https://api.fireworks.ai/inference/v1',
+        }
+        return streamOpenAiChat({ ...opts, session: patchedSession })
+      },
+    },
+  },
+  zhipu: {
+    id: 'zhipu',
+    name: 'Zhipu AI (智谱AI)',
+    models: ['glm-4-flash', 'glm-4-plus', 'glm-4-air', 'glm-4-long', 'glm-4.1-flash', 'glm-4.1-plus', 'glm-4.1-air', 'glm-4.1-thinking', 'glm-3-turbo', 'glm-4-flashx', 'glm-5', 'glm-4.7', 'glm-4.7-flash', 'glm-4.7-flashx'],
+    requiresApiKey: true,
+    requiresEndpoint: false,
+    defaultEndpoint: 'https://open.bigmodel.cn/api/coding/paas/v4',
+    handler: {
+      streamChat: (opts) => {
+        const patchedSession = {
+          ...opts.session,
+          apiEndpoint: opts.session.apiEndpoint || 'https://open.bigmodel.cn/api/coding/paas/v4',
+        }
+        return streamOpenAiChat({ ...opts, session: patchedSession })
+      },
+    },
+  },
+  minimax: {
+    id: 'minimax',
+    name: 'MiniMax',
+    models: ['MiniMax-M2.5', 'MiniMax-M2.5-highspeed', 'MiniMax-M2.5-Lightning'],
+    requiresApiKey: true,
+    requiresEndpoint: false,
+    defaultEndpoint: 'https://api.minimax.chat/v1',
+    handler: {
+      streamChat: (opts) => {
+        const patchedSession = {
+          ...opts.session,
+          apiEndpoint: opts.session.apiEndpoint || 'https://api.minimax.chat/v1',
+        }
+        return streamOpenAiChat({ ...opts, session: patchedSession })
+      },
+    },
+  },
+  moonshot: {
+    id: 'moonshot',
+    name: 'Moonshot AI (Kimi)',
+    models: ['kimi-k2.5'],
+    requiresApiKey: true,
+    requiresEndpoint: false,
+    defaultEndpoint: 'https://api.moonshot.ai/v1',
+    handler: {
+      streamChat: (opts) => {
+        const patchedSession = {
+          ...opts.session,
+          apiEndpoint: opts.session.apiEndpoint || 'https://api.moonshot.ai/v1',
+        }
+        return streamOpenAiChat({ ...opts, session: patchedSession })
+      },
+    },
+  },
+  kilocode: {
+    id: 'kilocode',
+    name: 'KiloCode',
+    models: ['claude-opus-4.6', 'glm-5', 'MiniMax-M2.5', 'claude-sonnet-4.5', 'gpt-5.2', 'gemini-3-pro-preview', 'gemini-3-flash-preview', 'grok-code-fast-1', 'kimi-k2.5'],
+    requiresApiKey: true,
+    requiresEndpoint: true,
+    defaultEndpoint: 'https://api.kilo.ai/api/gateway/',
+    handler: {
+      streamChat: (opts) => {
+        const patchedSession = {
+          ...opts.session,
+          apiEndpoint: opts.session.apiEndpoint || 'https://api.kilo.ai/api/gateway/',
         }
         return streamOpenAiChat({ ...opts, session: patchedSession })
       },
