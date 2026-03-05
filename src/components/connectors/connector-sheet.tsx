@@ -68,6 +68,7 @@ const PLATFORMS: {
     tokenHelp: 'From @BotFather after creating your bot',
     configFields: [
       { key: 'chatIds', label: 'Chat IDs', placeholder: '-100123456789', help: 'Leave empty to respond in all chats. Use negative IDs for groups.' },
+      { key: 'proxy', label: 'Proxy URL', placeholder: 'http://127.0.0.1:7890', help: 'HTTP proxy for connecting to Telegram API (optional)' },
     ],
   },
   {

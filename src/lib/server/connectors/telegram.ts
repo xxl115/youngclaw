@@ -1,4 +1,5 @@
 import { Bot, InputFile } from 'grammy'
+import { HttpsProxyAgent } from 'https-proxy-agent'
 import fs from 'fs'
 import path from 'path'
 import type { Connector } from '@/types'
@@ -8,7 +9,29 @@ import { isNoMessage } from './manager'
 
 const telegram: PlatformConnector = {
   async start(connector, botToken, onMessage): Promise<ConnectorInstance> {
-    const bot = new Bot(botToken)
+    const proxyUrl = connector.config.proxy?.trim()
+    
+    if (proxyUrl) {
+      console.log(`[telegram] Using proxy: ${proxyUrl}`)
+    }
+    
+    const httpsAgent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined
+    
+    const bot = new Bot(botToken, httpsAgent ? {
+      client: {
+        baseFetchConfig: {
+          agent: httpsAgent,
+        },
+      },
+    } : undefined)
+
+    // Test API connection
+    try {
+      const me = await bot.api.getMe()
+      console.log(`[telegram] Bot API OK: @${me.username} (id=${me.id})`)
+    } catch (err: any) {
+      console.error(`[telegram] Bot API failed: ${err.message}`)
+    }
 
     // Optional: restrict to specific chat IDs
     const allowedChats = connector.config.chatIds
@@ -161,10 +184,10 @@ const telegram: PlatformConnector = {
     bot.start({
       allowed_updates: ['message', 'edited_message'],
       onStart: (botInfo) => {
-        console.log(`[telegram] Bot started as @${botInfo.username} — polling for updates`)
+        console.log(`[telegram] Bot started as @${botInfo.username}`)
       },
     }).catch((err) => {
-      console.error(`[telegram] Polling stopped with error:`, err.message || err)
+      console.error(`[telegram] Polling error: ${err.message}`)
     })
 
     return {
