@@ -328,6 +328,9 @@ body {
   --font-sora: 'Segoe UI';
   --font-jetbrains-mono: 'Cascadia Code', 'Fira Code', monospace;
   
+  /* Agent message text */
+  --agent-foreground: #0a1628;
+
   /* Warm background tones */
   --background: #f0eae2;
   --foreground: #1c1916;
@@ -450,10 +453,10 @@ body {
 [data-theme="light"] .text-text-2 { color: var(--color-text-2) !important; }
 
 :root.light .text-text-3,
-[data-theme="light"] .text-text-3 { color: var(--color-text-3) !important; }
+[data-theme="light"] .text-text-3 { color: #a8a39b !important; }
 
-:root.light .text-text-4,
-[data-theme="light"] .text-text-4 { color: #a8a39b !important; }
+:root.light .text-agent,
+[data-theme="light"] .text-agent { color: var(--agent-foreground) !important; }
 
 :root.light .dark\:text-white,
 [data-theme="light"] .dark\:text-white { color: #3d3a35 !important; }
