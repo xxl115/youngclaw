@@ -503,6 +503,9 @@ body {
 :root.light .text-white,
 [data-theme="light"] .text-white { color: #3d3a35 !important; }
 
+:root.light .text-white\/\[0\.95\],
+[data-theme="light"] .text-white\/\[0\.95\] { color: rgba(0,0,0,0.75) !important; }
+
 :root.light .text-white\/\[0\.1\],
 [data-theme="light"] .text-white\/\[0\.1\] { color: rgba(0,0,0,0.1) !important; }
 
