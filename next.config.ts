@@ -1,13 +1,50 @@
 import type { NextConfig } from "next";
 import { execSync } from "child_process";
+import withPWA from "@ducanh2912/next-pwa";
 
 function getGitSha(): string {
   try {
-    return execSync('git rev-parse --short HEAD', { encoding: 'utf-8' }).trim()
+    return execSync('git rev-parse --short HEAD', { encoding: 'utf-8' }).trim();
   } catch {
-    return 'unknown'
+    return 'unknown';
   }
 }
+
+const pwaConfig = {
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === "development",
+  sw: "sw.js",
+  scope: "/",
+  runtimeCaching: [
+    {
+      urlPattern: /^https?.*/,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "online-cache",
+        expiration: {
+          maxEntries: 500,
+          maxAgeSeconds: 24 * 60 * 60,
+        },
+        cacheableResponse: {
+          statuses: [0, 200],
+        },
+      },
+    },
+    {
+      urlPattern: /\.(?:js|css|html|json|png|jpg|jpeg|svg|ico)$/,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "static-cache",
+        expiration: {
+          maxEntries: 1000,
+          maxAgeSeconds: 60 * 60 * 24 * 30,
+        },
+      },
+    },
+  ],
+};
 
 const nextConfig: NextConfig = {
   output: 'standalone',
@@ -17,24 +54,28 @@ const nextConfig: NextConfig = {
         ...config.resolve.fallback,
         crypto: require.resolve('crypto-browserify'),
       };
+      config.externals = config.externals || [];
+      config.externals.push({
+        'zlib-sync': 'commonjs zlib-sync',
+      });
+      if (!config.module) config.module = {};
+      config.module.noParse = config.module.noParse || [];
+      config.module.noParse.push(/zlib-sync/);
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'zlib-sync': false,
+      };
     }
     return config;
   },
-  turbopack: {
-    // Pin workspace root to the project directory so a stale lockfile
-    // in a parent folder (e.g. ~/) doesn't confuse native module resolution.
-    root: process.cwd(),
-  },
   experimental: {
-    // Disable Turbopack persistent cache — concurrent HMR writes cause
-    // "Another write batch or compaction is already active" errors
     turbopackFileSystemCacheForDev: false,
   },
+  turbopack: {},
   env: {
     NEXT_PUBLIC_GIT_SHA: getGitSha(),
     NEXT_PUBLIC_WS_PORT: String((Number(process.env.PORT) || 3456) + 1),
   },
-  // Allow external network access
   serverExternalPackages: [
     'ws',
     'highlight.js', 'better-sqlite3',
@@ -64,4 +105,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withPWA(pwaConfig)(nextConfig);
