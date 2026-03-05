@@ -1,20 +1,49 @@
 # SwarmClaw - AI Agent Development Guide
 
-This guide helps AI agents (like yourself) work effectively with the SwarmClaw codebase.
+This guide helps AI agents work effectively with the SwarmClaw codebase.
 
 ## Quick Start
 
 ```bash
 # Clone and install
-git clone https://github.com/xxl115/youngclaw.git
-cd youngclaw
+git clone https://github.com/swarmclawai/swarmclaw.git
+cd swarmclaw
 npm install
 
 # Start dev server
 npm run dev
 
-# Run a single test (e.g., connector tests)
-npm run test:openclaw -- --grep "connector"
+# Build for production
+npm run build
+
+# Run tests
+npm run test:cli
+npm run test:openclaw
+```
+
+---
+
+## Build / Lint / Test Commands
+
+| Command | Purpose |
+|---------|---------|
+| `npm run dev` | Start development server (port 3456) |
+| `npm run build` | Build production bundle with webpack |
+| `npm run build:ci` | Build without ESLint checks |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |
+| `npm run lint:fix` | Fix ESLint issues automatically |
+| `npm run test:cli` | Run CLI tests |
+| `npm run test:openclaw` | Run OpenClaw connector tests |
+
+### Running a Single Test
+
+```bash
+# Run specific test file
+tsx --test src/lib/server/connectors/openclaw.test.ts
+
+# Run with grep pattern
+tsx --test src/lib/server/connectors/openclaw.test.ts --grep "connector"
 ```
 
 ---
@@ -23,71 +52,79 @@ npm run test:openclaw -- --grep "connector"
 
 ### TypeScript Configuration
 
-- **Strict mode enabled** - `tsconfig.json` has `"strict": true`
+- **Strict mode enabled** in `tsconfig.json`
 - **Target**: ES2017, ESNext
-- **JSX**: `react-jsx`
-- Always use proper typing - avoid `any` unless necessary
-- Use proper imports over `require()`
+- **Module**: esnext, moduleResolution: bundler
+- **No `any`** unless absolutely necessary
+- **No `any`** in function parameters (use specific types)
 
 ### Import Organization
 
 ```typescript
-// Group 1: External libraries (no relative path)
+// 1. External dependencies (no @ alias)
 import { Bot } from 'grammy'
 import { NextResponse } from 'next/server'
+import fs from 'fs'
+import path from 'path'
 
-// Group 2: Internal modules (relative path with @/ alias)
-import type { Connector } from '@/types'
+// 2. Internal modules (use @/ alias)
 import { loadConnectors } from '@/lib/server/storage'
-
-// Group 3: React
-import { useState, useEffect } from 'react'
+import { streamAgentChat } from '@/lib/server/stream-agent-chat'
+import type { Connector } from '@/types'
 import { useAppStore } from '@/stores/use-app-store'
+
+// 3. React
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { useWs } from '@/hooks/use-ws'
 ```
-
-### Formatting & Style
-
-- **Use shadcn/ui components** - don't reinvent buttons, dialogs, etc.
-- **Tailwind CSS** - prefer utility classes over inline styles
-- **Avoid inline styles** - use the CSS variable system (`--color-text`, `--background`, etc.)
-- **File structure** - one export per file (ESM), named exports for libraries
 
 ### Naming Conventions
 
-| Context | Convention | Example |
+| Context | Convention | Examples |
 |----------|------------|----------|
-| Components | PascalCase | `ChatInput.tsx`, `AgentSheet.tsx` |
-| Functions | camelCase | `loadConnectors()`, `streamOpenAiChat()` |
-| Constants | UPPER_SNAKE_CASE | `MAX_ATTEMPTS`, `DEFAULT_TIMEOUT` |
-| Interfaces | PascalCase, prefixed with type | `StreamChatOptions`, `ConnectorInstance` |
-| React Hooks | `use` prefix | `useAppStore()`, `useWs()` |
-| Event Handlers | `handle` prefix | `handleSend()`, `handleKeyDown()` |
-| Files | kebab-case | `telegram-connector.ts`, `api-routes.ts` |
+| Files | kebab-case | `telegram.ts`, `openclaw.test.ts`, `chat-area.tsx` |
+| Components | PascalCase | `ChatInput`, `MessageList`, `ConnectorSheet` |
+| Functions | camelCase | `loadConnectors()`, `sendMessage()`, `handleKeyDown()` |
+| Constants | UPPER_SNAKE_CASE | `MAX_ATTEMPTS`, `DEFAULT_TIMEOUT`, `COLLECTIONS` |
+| Interfaces | PascalCase | `Connector`, `Session`, `Message`, `PlatformConnector` |
+| Types | PascalCase | `ProviderType`, `SessionType`, `MessageSource` |
+| React Hooks | `use` prefix | `useAppStore()`, `useWs()`, `useMediaQuery()` |
+| Event Handlers | `handle` prefix | `handleSend()`, `handleKeyDown()`, `handlePaste()` |
+| Private functions | `_` prefix (optional) | `_downloadMedia()`, `_uploadFile()` |
+
+### Formatting & Style
+
+- **Use shadcn/ui components** - don't reinvent UI elements
+- **Tailwind CSS** - prefer utility classes over inline styles
+- **Avoid inline styles** - use CSS variables (`--color-text`, `--background`, etc.)
+- **Dark/Light theme support** - use `isDark` from `useAppStore()`, CSS variables defined in `globals.css`
+- **Font**: `Segoe UI` for most text, `Cascadia Code` for monospace
 
 ### Error Handling
 
 ```typescript
-// API Routes - return NextResponse.json with error
+// API Routes - return NextResponse with error
 if (!connector) {
   return notFound()
 }
 
-// Async functions - wrap in try/catch, return error response
+// Async operations - wrap in try/catch
 try {
   const result = await riskyOperation()
   return NextResponse.json(result)
 } catch (err: unknown) {
-  console.error('Operation failed:', err)
+  console.error('[feature] Operation failed:', err)
+  const message = err instanceof Error ? err.message : String(err)
   return NextResponse.json(
-    { error: err instanceof Error ? err.message : String(err) },
+    { error: message },
     { status: 500 }
   )
 }
 
 // Logging
-console.log(`[feature] Action: ${action}`)
-console.error(`[feature] Error: ${error}`)
-console.warn(`[feature] Warning: ${warning}`)
+console.log('[feature] Action:', action)
+console.warn('[feature] Warning:', warning)
+console.error('[feature] Error:', error)
 ```
 
 ---
@@ -99,96 +136,80 @@ console.warn(`[feature] Warning: ${warning}`)
 ```
 swarmclaw/
 ├── src/
-│   ├── app/                    # Next.js App Router (API routes)
-│   ├── components/             # React components
+│   ├── app/                    # Next.js App Router (API routes, pages)
+│   ├── components/             # React components (chat, connectors, etc.)
 │   ├── lib/                   # Internal libraries
 │   │   ├── server/            # Server-side code (API, connectors, storage)
 │   │   ├── providers/         # LLM provider implementations
 │   │   └── shared/           # Shared utilities
 │   ├── stores/                # Zustand state management
-│   └── types/                # TypeScript type definitions
+│   ├── hooks/                 # React hooks
+│   └── types/                 # TypeScript type definitions
 ├── tests/                    # Node.js tests
 └── public/                    # Static assets
 ```
 
 ### Key Modules
 
-| Module | Purpose | Location |
-|---------|---------|----------|
-| Connectors | Platform integrations (Telegram, Discord, etc.) | `src/lib/server/connectors/` |
-| Storage | SQLite persistence | `src/lib/server/storage.ts` |
-| Providers | LLM streaming implementations | `src/lib/providers/` |
-| Session Manager | Chat session orchestration | `src/lib/server/session-run-manager.ts` |
-| WebSocket Hub | Real-time communication | `src/lib/server/ws-hub.ts` |
+| Module | Purpose |
+|--------|---------|
+| `storage.ts` | SQLite persistence (connectors, sessions, agents, etc.) |
+| `connector/manager.ts` | Connector lifecycle and routing |
+| `stream-agent-chat.ts` | LLM streaming orchestration |
+| `ws-hub.ts` | WebSocket server for real-time updates |
+| `session-run-manager.ts` | Chat session execution |
+| `daemon-state.ts` | Background task scheduler |
 
 ---
 
-## Adding a New LLM Provider
+## Testing Patterns
 
-1. Create provider file: `src/lib/providers/yourprovider.ts`
-
-```typescript
-import { streamOpenAiChat } from './openai'
-import type { StreamChatOptions } from './index'
-
-export async function streamYourProviderChat(opts: StreamChatOptions): Promise<string> {
-  const patchedSession = {
-    ...opts.session,
-    apiEndpoint: opts.session.apiEndpoint || 'https://api.yourprovider.com/v1',
-  }
-  return streamOpenAiChat({ ...opts, session: patchedSession })
-}
-```
-
-2. Register in `src/lib/providers/index.ts`:
+### Using Node.js Built-in Test Framework
 
 ```typescript
-const PROVIDERS: Record<string, BuiltinProviderConfig> = {
-  yourprovider: {
-    id: 'yourprovider',
-    name: 'Your Provider Name',
-    models: ['model-1', 'model-2'],
-    requiresApiKey: true,
-    requiresEndpoint: false,
-    defaultEndpoint: 'https://api.yourprovider.com/v1',
-    handler: {
-      streamChat: (opts) => streamYourProviderChat(opts),
-    },
-  },
-  // ... existing providers
-}
+import assert from 'node:assert/strict'
+import { test } from 'node:test'
+
+test('example test', async () => {
+  const result = await someFunction()
+  assert.equal(result, 'expected')
+  assert.ok(result.success)
+})
+
+test.beforeEach(() => {
+  // Setup: create mocks, reset state
+})
+
+test.afterEach(() => {
+  // Teardown: cleanup
+})
 ```
 
-3. Add to `src/types/index.ts` ProviderType union:
+### Test Patterns
 
-```typescript
-export type ProviderType = 
-  | 'claude-cli' | 'codex-cli' | 'opencode-cli' 
-  | 'openai' | 'ollama' | 'anthropic' | 'openclaw' 
-  | 'google' | 'deepseek' | 'groq' | 'together' | 'mistral' 
-  | 'xai' | 'fireworks' | 'zhipu' | 'minimax' | 'moonshot' 
-  | 'kilocode' | 'yourprovider'
-```
+- **Mocking**: Use simple mock classes for WebSocket, databases
+- **Async/await**: All async operations should be properly awaited
+- **assert module**: Use `assert.equal()`, `assert.ok()`, `assert.deepStrictEqual()`
+- **Timeouts**: Use `waitFor()` helper with explicit timeouts
 
 ---
 
 ## Adding a New Connector
 
-1. Create connector file: `src/lib/server/connectors/yourplatform.ts`
+### 1. Create Connector File
 
 ```typescript
 import type { PlatformConnector, ConnectorInstance, InboundMessage } from './types'
-import { isNoMessage } from './manager'
 
-const yourplatform: PlatformConnector = {
+const myplatform: PlatformConnector = {
   async start(connector, credential, onMessage): Promise<ConnectorInstance> {
-    // Initialize your connection
-    console.log(`[yourplatform] Starting connector: ${connector.name}`)
-
-    // Listen for messages
+    const botToken = connector.config.botToken
+    console.log(`[myplatform] Starting: ${connector.name}`)
+    
+    // Initialize connection
     const messageHandler = (msg: any) => {
       const inbound: InboundMessage = {
-        platform: 'yourplatform',
+        platform: 'myplatform',
         channelId: msg.channelId,
         senderId: msg.senderId,
         text: msg.text,
@@ -197,139 +218,129 @@ const yourplatform: PlatformConnector = {
       
       if (!isNoMessage(response)) {
         // Send response back
-        // yourSendMessageFn(msg.channelId, response)
+        await sendResponse(msg.channelId, response)
       }
     }
-
+    
     // Start listening
-    // yourListenFn(messageHandler)
-
+    // Listen for messages and call messageHandler
+    
     return {
       connector,
       async sendMessage(channelId, text, options) {
+        console.log(`[myplatform] Sending to ${channelId}:`, text.slice(0, 50))
         // Send message to platform
-        console.log(`[yourplatform] Sending to ${channelId}:`, text.slice(0, 50))
       },
       async stop() {
-        // Cleanup and stop listening
-        console.log(`[yourplatform] Stopped`)
+        console.log('[myplatform] Stopped')
+        // Cleanup
       },
     }
   },
 }
+export default myplatform
 ```
 
-2. Register in `src/lib/server/connectors/manager.ts` by adding to the platform map
+### 2. Register in manager
+
+Add to connector map in `manager.ts`:
+
+```typescript
+import myplatform from './myplatform'
+
+const PLATFORMS: Record<string, PlatformConnector> = {
+  telegram,
+  discord,
+  // ... others
+  myplatform,
+}
+```
 
 ---
 
 ## Database Schema
 
-Connectors, agents, sessions, and other entities are stored in SQLite:
+### Connector Structure
 
 ```typescript
-// Connector structure
-{
-  id: string,           // UUID
-  name: string,
-  platform: 'telegram' | 'discord' | 'slack' | 'whatsapp',
-  agentId?: string,    // Link to an agent
+interface Connector {
+  id: string              // UUID (genId())
+  name: string
+  platform: 'telegram' | 'discord' | 'slack' | 'whatsapp' | 'openclaw' | 'bluebubbles'
+  agentId?: string       // Link to an agent
+  chatroomId?: string     // Link to a chatroom
+  credentialId?: string
   config: {
     botToken?: string,
-    proxy?: string,
-    chatIds?: string,
-  },
-  isEnabled: boolean,
-  status: 'stopped' | 'running' | 'error',
-  lastError?: string,
-}
-
-// Session structure
-{
-  id: string,           // Session ID (genId())
-  name: string,
-  agentId: string,
-  provider: string,
-  cwd?: string,
-  user?: string,
-  active: boolean,
-  queuedCount: number,
+    proxy?: string,         // HTTP proxy URL
+    chatIds?: string,        // Comma-separated list
+    wsUrl?: string,         // WebSocket URL (OpenClaw)
+    historyPoll?: boolean,
+    historyPollMs?: number,
+  }
+  isEnabled: boolean
+  status: 'stopped' | 'running' | 'error'
+  lastError?: string
+  createdAt: number
+  updatedAt: number
 }
 ```
 
-Use `loadConnectors()`, `saveConnectors()` from `src/lib/server/storage.ts`.
+### Session Structure
 
----
-
-## Testing
-
-### Running Tests
-
-```bash
-# Run all tests
-npm run test:cli
-
-# Run specific test file
-npm run test:openclaw src/lib/server/connectors/openclaw.test.ts
-
-# Run with grep pattern
-npm run test:cli -- --grep "connect"
-```
-
-### Test Patterns
-
-- Use `test()` from Node.js built-in test framework
-- Use `assert` for assertions
-- Use `test.beforeEach()` and `test.afterEach()` for setup/teardown
-- For async tests, use `await waitFor()` helper with timeout
-
-Example from `openclaw.test.ts`:
 ```typescript
-const chatReq = await waitFor(() => findReq(ws, 'chat.send'), 2_000)
-assert.equal(chatReq.params.message, 'pong')
+interface Session {
+  id: string              // Session ID (genId())
+  name: string
+  cwd?: string
+  user: string
+  provider: ProviderType
+  model: string
+  credentialId?: string
+  apiEndpoint?: string | null
+  claudeSessionId: string | null
+  codexThreadId?: string | null
+  opencodeSessionId?: string | null
+  agentId?: string | null
+  parentSessionId?: string | null
+  messages: Message[]
+  createdAt: number
+  lastActiveAt: number
+  active?: boolean
+}
 ```
 
 ---
 
 ## API Route Patterns
 
-API routes follow Next.js App Router conventions:
-
 ```typescript
-// File: src/app/api/connectors/[id]/route.ts
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params
-  const connector = loadConnectors()[id]
-  if (!connector) return notFound()
-  return NextResponse.json(connector)
+// GET /api/endpoint
+export async function GET(_req: Request) {
+  const data = getData()
+  return NextResponse.json(data)
 }
-```
 
-- Use `NextResponse.json()` for JSON responses
-- Use `notFound()` for 404s
-- Use dynamic exports: `export const dynamic = 'force-dynamic'` for API routes
-- Access control is handled in `src/proxy.ts` - check before mutating state
+// POST /api/endpoint
+export async function POST(req: Request) {
+  const body = await req.json()
+  // Process body
+  return NextResponse.json({ success: true })
+}
 
----
-
-## Environment Variables
-
-Required environment variables (set in `.env.local`):
-
-```bash
-# Access control
-ACCESS_KEY=your-random-key-here
-
-# Optional: provider-specific
-# OPENCLAW_API_ENDPOINT=https://claw.xxl185.dpdns.org/v1
-# OPENCLAW_GATEWAY_TOKEN=your-gateway-token
-
-# Ports
-PORT=3456                    # Dev server port
-WS_PORT=3457                # WebSocket server port
+// Error handling
+export async function POST(req: Request) {
+  try {
+    const result = await doWork()
+    return NextResponse.json(result)
+  } catch (err: unknown) {
+    console.error('[endpoint] Error:', err)
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Unknown error' },
+      { status: 500 }
+    )
+  }
+}
 ```
 
 ---
@@ -339,84 +350,98 @@ WS_PORT=3457                # WebSocket server port
 SwarmClaw uses **Zustand** for global state:
 
 ```typescript
-// Access state
+// Reading state
 import { useAppStore } from '@/stores/use-app-store'
 
 const currentUser = useAppStore((s) => s.currentUser)
-const setAgent = useAppStore((s) => s.setEditingAgentId)
+const sessions = useAppStore((s) => s.sessions)
 
-// Mutate state
+// Mutating state
 useAppStore.setState({ activeView: 'agents' })
 
-// Persist state to storage
-saveConnectors(connectors)
-saveSessions(sessions)
+// Async mutations
+const loadSessions = useAppStore((s) => s.loadSessions)
+const setCurrentSession = useAppStore((s) => s.setCurrentSession)
 ```
 
 ---
 
 ## WebSocket Integration
 
-For real-time updates, use the WebSocket hub:
+Real-time updates via WebSocket:
 
 ```typescript
 import { connectWs } from '@/lib/ws-client'
 
-// Connect to hub
-connectWs(accessKey)
+// Connect on mount
+useEffect(() => {
+  const key = getStoredAccessKey()
+  if (key) connectWs(key)
+  return () => disconnectWs()
+}, [])
 
 // Listen for updates
 useWs('sessions', loadSessions, 5000)
 useWs('connectors', loadConnectors, 5000)
+useWs('agents', loadAgents, 5000)
 ```
 
 ---
 
 ## Important Notes
 
-1. **Security**: Never commit credentials or API keys. Use `.env.local` or the Secrets management UI.
-2. **Database migrations**: SQLite is used directly - no ORM, use migrations carefully.
-3. **Proxy Support**: Telegram connectors support `config.proxy` for HTTP proxies (e.g., `http://127.0.0.1:7890`).
-4. **No server-side sessions**: State is client-side; server stores session metadata but not user data.
-5. **Error handling**: Always catch errors in connectors and log them. Failed operations should set `lastError`.
-6. **Rate limiting**: Proxy middleware in `src/proxy.ts` enforces rate limits based on IP and failed attempts.
+1. **Security**: Never commit credentials or API keys. Use `.env.local` or Secrets management UI
+2. **Database migrations**: SQLite used directly - handle carefully
+3. **Proxy support**: Connectors support `config.proxy` (HTTP format)
+4. **Error handling**: Always catch errors in connectors, set `lastError` field
+5. **Type safety**: Use TypeScript strict mode - prefer specific types over `any`
+6. **Testing**: Use Node.js built-in `test` framework with `assert`
+7. **Theming**: Support for light/dark themes via CSS variables
 
 ---
 
 ## Common Patterns
 
-### Async Operation with Timeout
-
-```typescript
-import { waitFor } from './tests/timeout-helper'
-
-const result = await waitFor(
-  () => getWebSocketInstance(),
-  1_000,  // timeout in ms
-)
-```
-
-### Safe Database Access
-
-```typescript
-const db = new Database('./data/swarmclaw.db', { readonly: true })
-
-// Always close connections
-const stmt = db.prepare('SELECT * FROM connectors WHERE id = ?')
-const connector = stmt.get(id)
-db.close()  // Explicitly close
-```
-
 ### Type Guards
 
 ```typescript
-function isConnector(connector: any): connector is Connector {
-  return connector && 'id' in connector && 'platform' in connector
+function isConnector(connector: unknown): connector is Connector {
+  return connector && typeof connector === 'object' && 'id' in connector && 'platform' in connector
 }
 
-function hasText(message: InboundMessage): message is InboundMessage & { text: string } {
-  return 'text' in message && typeof message.text === 'string'
+function hasText(message: unknown): message is { text: string } {
+  return typeof message === 'object' && 'text' in message && typeof message.text === 'string'
 }
+```
+
+### Async Timeout Helper
+
+```typescript
+async function waitFor<T>(
+  getValue: () => T | null | undefined,
+  timeoutMs = 2_000
+): Promise<T> {
+  const started = Date.now()
+  while (Date.now() - started <= timeoutMs) {
+    const value = getValue()
+    if (value) return value
+    await new Promise((resolve) => setTimeout(resolve, 10))
+  }
+  throw new Error(`waitFor timed out after ${timeoutMs}ms`)
+}
+```
+
+### Logging Convention
+
+```typescript
+// Feature prefix for easy grep filtering
+console.log('[feature] Action:', action)
+console.error('[feature] Error:', error)
+console.warn('[feature] Warning:', warning)
+
+// For connectors, log connection status
+console.log('[platform] Status:', status)
+console.log('[platform] Message from:', user)
 ```
 
 ---
@@ -426,7 +451,7 @@ function hasText(message: InboundMessage): message is InboundMessage & { text: s
 ### Dev Server Issues
 
 ```bash
-# Port already in use
+# Port conflict
 lsof -i :3456
 kill -9 <PID>
 
@@ -439,10 +464,36 @@ npm run dev:clean
 
 | Error | Solution |
 |--------|----------|
-| `Module not found` | Check `tsconfig.json` paths and imports |
-| `cannot resolve '@/types'` | Ensure importing from `src/` not `lib/` |
-| `Connector failed to start` | Check `lastError` field in connector, check network/proxy |
-| `WebSocket connection failed` | Ensure proxy is configured and reachable |
+| `Module not found` | Check `tsconfig.json` paths, verify installation |
+| `EADDRINUSE` | Check for conflicts: `lsof -i :3456` |
+| `Connector failed to start` | Check `lastError` field, verify network/proxy |
+| `Timeout` | Check API rate limits, increase timeout values |
+
+---
+
+## Environment Variables
+
+Required variables (set in `.env.local`):
+
+```bash
+# Access control
+ACCESS_KEY=your-random-access-key-here
+
+# Optional: provider-specific
+# OPENCLAW_API_ENDPOINT=https://api.openclaw.ai/v1
+# OPENCLAW_GATEWAY_TOKEN=your-gateway-token
+```
+
+---
+
+## Development Workflow
+
+1. **Create feature branch**: `git checkout -b feature/my-new-feature`
+2. **Make changes**: Edit files, add tests
+3. **Lint and build**: `npm run lint && npm run build`
+4. **Test**: `npm run test:openclaw`
+5. **Commit**: `git add . && git commit -m "feat: my change"`
+6. **Push**: `git push origin feature/my-new-feature`
 
 ---
 
@@ -453,5 +504,5 @@ npm run dev:clean
 | `package.json` | Scripts and dependencies |
 | `tsconfig.json` | TypeScript compiler options |
 | `eslint.config.mjs` | ESLint configuration |
-| `next.config.ts` | Next.js configuration (PWA, webpack) |
+| `next.config.ts` | Next.js configuration |
 | `.env.local` | Environment variables (gitignored) |
