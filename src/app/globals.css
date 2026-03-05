@@ -453,7 +453,7 @@ body {
 [data-theme="light"] .text-text-2 { color: var(--color-text-2) !important; }
 
 :root.light .text-text-3,
-[data-theme="light"] .text-text-3 { color: #a8a39b !important; }
+[data-theme="light"] .text-text-3 { color: #5a5651 !important; }
 
 :root.light .text-agent,
 [data-theme="light"] .text-agent { color: var(--agent-foreground) !important; }
@@ -466,6 +466,43 @@ body {
 
 :root.light .dark\:bg-background,
 [data-theme="light"] .dark\:bg-background { background-color: #f5f4ef !important; }
+
+/* Dark backgrounds for overlays in light mode */
+:root.light .bg-black\/\[0\.02\],
+[data-theme="light"] .bg-black\/\[0\.02\] { background-color: rgba(0,0,0,0.02) !important; }
+
+:root.light .bg-black\/\[0\.06\],
+[data-theme="light"] .bg-black\/\[0\.06\] { background-color: rgba(0,0,0,0.06) !important; }
+
+:root.light .bg-black\/\[0\.10\],
+[data-theme="light"] .bg-black\/\[0\.10\] { background-color: rgba(0,0,0,0.1) !important; }
+
+:root.light .bg-black\/\[0\.15\],
+[data-theme="light"] .bg-black\/\[0\.15\] { background-color: rgba(0,0,0,0.15) !important; }
+
+:root.light .bg-black\/\[0\.20\],
+[data-theme="light"] .bg-black\/\[0\.20\] { background-color: rgba(0,0,0,0.2) !important; }
+
+:root.light .bg-black\/\[0\.30\],
+[data-theme="light"] .bg-black\/\[0\.30\] { background-color: rgba(0,0,0,0.3) !important; }
+
+:root.light .bg-black\/\[0\.40\],
+[data-theme="light"] .bg-black\/\[0\.40\] { background-color: rgba(0,0,0,0.4) !important; }
+
+:root.light .bg-black\/\[0\.50\],
+[data-theme="light"] .bg-black\/\[0\.50\] { background-color: rgba(0,0,0,0.5) !important; }
+
+:root.light .bg-black\/\[0\.60\],
+[data-theme="light"] .bg-black\/\[0\.60\] { background-color: rgba(0,0,0,0.6) !important; }
+
+:root.light .bg-black\/\[0\.70\],
+[data-theme="light"] .bg-black\/\[0\.70\] { background-color: rgba(0,0,0,0.7) !important; }
+
+:root.light .bg-black\/\[0\.80\],
+[data-theme="light"] .bg-black\/\[0\.80\] { background-color: rgba(0,0,0,0.8) !important; }
+
+:root.light .bg-black,
+[data-theme="light"] .bg-black { background-color: rgba(0,0,0,0.8) !important; }
 
 :root.light .bg-white,
 [data-theme="light"] .bg-white { background-color: rgba(0,0,0,0.05) !important; }
