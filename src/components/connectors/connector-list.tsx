@@ -118,23 +118,24 @@ export function ConnectorList({ inSidebar }: { inSidebar?: boolean }) {
           const chatroom = c.chatroomId ? chatrooms[c.chatroomId] : null
           const isRunning = c.status === 'running'
           const meta = CONNECTOR_PLATFORM_META[c.platform]
+          const displayName = chatroom ? chatroom.name : (agent?.name || meta?.label || c.platform)
           return (
-            <button
-              key={c.id}
-              onClick={() => { setEditingConnectorId(c.id); setConnectorSheetOpen(true) }}
-              className="w-full flex items-center gap-3 px-5 py-2.5 hover:bg-white/[0.02] transition-colors cursor-pointer bg-transparent border-none text-left"
-            >
+            <div
+                key={c.id}
+                onClick={() => { setEditingConnectorId(c.id); setConnectorSheetOpen(true) }}
+                className="w-full flex items-center gap-3 px-5 py-2.5 hover:bg-white/[0.02] transition-colors cursor-pointer"
+              >
               <ConnectorPlatformIcon platform={c.platform} size={16} />
               <div className="flex-1 min-w-0">
                 <span className="text-[13px] font-600 text-text truncate block">{c.name}</span>
                 <span className="text-[11px] text-text-3 truncate block">
-                  {chatroom ? chatroom.name : agent?.name || meta?.label}
+                  {chatroom ? chatroom.name : agent?.name || meta?.label || c.platform}
                 </span>
               </div>
               <span className={`shrink-0 w-2 h-2 rounded-full ${
                 isRunning ? 'bg-green-400' : c.status === 'error' ? 'bg-red-400' : 'bg-white/20'
               }`} />
-            </button>
+            </div>
           )
         })}
       </div>
@@ -163,13 +164,13 @@ export function ConnectorList({ inSidebar }: { inSidebar?: boolean }) {
             || !!c.credentialId
           const lastMsg = c.presence?.lastMessageAt
 
-          return (
-            <button
-              key={c.id}
-              onClick={() => { setEditingConnectorId(c.id); setConnectorSheetOpen(true) }}
-              className="group relative flex flex-col rounded-[14px] border border-white/[0.06] bg-surface p-4 cursor-pointer transition-all hover:border-white/[0.12] hover:bg-white/[0.02] text-left w-full"
-              style={{ fontFamily: 'inherit' }}
-            >
+           return (
+            <div
+                key={c.id}
+                onClick={() => { setEditingConnectorId(c.id); setConnectorSheetOpen(true) }}
+                className="group relative flex flex-col rounded-[14px] border border-white/[0.06] bg-surface p-4 cursor-pointer transition-all hover:border-white/[0.12] hover:bg-white/[0.02] text-left w-full"
+                style={{ fontFamily: 'inherit' }}
+              >
               {/* Header: platform badge + status */}
               <div className="flex items-center gap-3 mb-3">
                 <ConnectorPlatformBadge platform={c.platform} size={40} iconSize={20} roundedClassName="rounded-[10px]" />
@@ -262,10 +263,10 @@ export function ConnectorList({ inSidebar }: { inSidebar?: boolean }) {
                       )}
                     </button>
                   )}
-                </div>
-              </div>
-            </button>
-          )
+                 </div>
+               </div>
+             </div>
+           )
         })}
       </div>
     </div>

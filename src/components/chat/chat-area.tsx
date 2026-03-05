@@ -384,7 +384,9 @@ export function ChatArea() {
           </div>
         </div>
       ) : (
-        <MessageList messages={messages} streaming={streamingForThisSession} connectorFilter={connectorFilter} />
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <MessageList messages={messages} streaming={streamingForThisSession} connectorFilter={connectorFilter} />
+        </div>
       )}
 
       {voice.active && (

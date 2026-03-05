@@ -153,12 +153,13 @@ export function ConnectorPlatformBadge({
 }: ConnectorPlatformBadgeProps) {
   const meta = CONNECTOR_PLATFORM_META[platform]
   const glyphSize = iconSize ?? Math.max(12, Math.floor(size * 0.52))
+  const platformLabel = meta?.label || platform
 
   return (
     <span
-      title={title || `${meta.label} connector`}
+      title={title || `${platformLabel} connector`}
       className={cn('inline-flex items-center justify-center shrink-0', roundedClassName, className)}
-      style={{ width: size, height: size, backgroundColor: meta.color }}
+      style={{ width: size, height: size, backgroundColor: meta?.color || '#666' }}
     >
       <ConnectorPlatformIcon platform={platform} size={glyphSize} className="text-white" />
     </span>

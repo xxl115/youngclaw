@@ -12,7 +12,7 @@ import { SetupWizard } from '@/components/auth/setup-wizard'
 import { AppLayout } from '@/components/layout/app-layout'
 import { useViewRouter } from '@/hooks/use-view-router'
 
-function FullScreenLoader() {
+function FullScreenLoader({ isDark }: { isDark: boolean }) {
   return (
     <div className="h-full flex flex-col items-center justify-center bg-bg overflow-hidden select-none">
       {/* Animated orbital ring */}
@@ -279,10 +279,10 @@ export default function Home() {
 
   useViewRouter()
 
-  if (!hydrated || !authChecked) return <FullScreenLoader />
+  if (!hydrated || !authChecked) return <FullScreenLoader isDark={isDark} />
   if (!authenticated) return <AccessKeyGate onAuthenticated={() => setAuthenticated(true)} />
   if (!currentUser) return <UserPicker />
-  if (setupDone === null || !agentReady) return <FullScreenLoader />
+  if (setupDone === null || !agentReady) return <FullScreenLoader isDark={isDark} />
   if (!setupDone) return <SetupWizard onComplete={() => setSetupDone(true)} />
   return <AppLayout />
 }
