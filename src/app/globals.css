@@ -304,11 +304,15 @@ html.light {
 
 html {
   scrollbar-gutter: stable;
+  height: 100%;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 @layer base {
