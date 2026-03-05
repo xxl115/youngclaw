@@ -13,6 +13,10 @@ type SetupProvider =
   | 'mistral'
   | 'xai'
   | 'fireworks'
+  | 'zhipu'
+  | 'minimax'
+  | 'moonshot'
+  | 'kilocode'
   | 'ollama'
   | 'openclaw'
 
@@ -198,7 +202,11 @@ export async function POST(req: Request) {
       case 'together':
       case 'mistral':
       case 'xai':
-      case 'fireworks': {
+      case 'fireworks':
+      case 'zhipu':
+      case 'minimax':
+      case 'moonshot':
+      case 'kilocode': {
         const info = OPENAI_COMPATIBLE_DEFAULTS[provider]
         if (!apiKey) return NextResponse.json({ ok: false, message: `${info.name} API key is required.` })
         const result = await checkOpenAiCompatible(info.name, apiKey, endpoint, info.defaultEndpoint)

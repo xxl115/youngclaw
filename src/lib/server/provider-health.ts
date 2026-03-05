@@ -139,6 +139,10 @@ export const OPENAI_COMPATIBLE_DEFAULTS: Record<string, { name: string; defaultE
   mistral: { name: 'Mistral AI', defaultEndpoint: 'https://api.mistral.ai/v1' },
   xai: { name: 'xAI (Grok)', defaultEndpoint: 'https://api.x.ai/v1' },
   fireworks: { name: 'Fireworks AI', defaultEndpoint: 'https://api.fireworks.ai/inference/v1' },
+  zhipu: { name: 'Zhipu AI (智谱)', defaultEndpoint: 'https://open.bigmodel.cn/api/coding/paas/v4' },
+  minimax: { name: 'MiniMax', defaultEndpoint: 'https://api.minimax.chat/v1' },
+  moonshot: { name: 'Moonshot AI (Kimi)', defaultEndpoint: 'https://api.moonshot.ai/v1' },
+  kilocode: { name: 'KiloCode', defaultEndpoint: 'https://api.kilo.ai/api/gateway/' },
 }
 
 export async function pingOpenAiCompatible(

@@ -22,7 +22,7 @@ export interface Message {
   source?: MessageSource
 }
 
-export type ProviderType = 'claude-cli' | 'codex-cli' | 'opencode-cli' | 'openai' | 'ollama' | 'anthropic' | 'openclaw' | 'google' | 'deepseek' | 'groq' | 'together' | 'mistral' | 'xai' | 'fireworks'
+export type ProviderType = 'claude-cli' | 'codex-cli' | 'opencode-cli' | 'openai' | 'ollama' | 'anthropic' | 'openclaw' | 'google' | 'deepseek' | 'groq' | 'together' | 'mistral' | 'xai' | 'fireworks' | 'zhipu' | 'minimax' | 'moonshot' | 'kilocode'
 
 export interface ProviderInfo {
   id: ProviderType
@@ -570,6 +570,7 @@ export interface AppSettings {
   defaultAgentId?: string | null
   // Theme
   themeHue?: string
+  themeMode?: 'dark' | 'light'
   // Web search provider
   webSearchProvider?: 'duckduckgo' | 'google' | 'bing' | 'searxng' | 'tavily' | 'brave'
   searxngUrl?: string
